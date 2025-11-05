@@ -62,6 +62,13 @@ export default defineIntegration({
 								],
 								optimizeDeps: {
 									include: ['picomatch', 'micromatch', 'anymatch'],
+								esbuildOptions: {
+									// EXPL: Define process.platform during esbuild pre-bundling to prevent runtime errors
+									//       This runs during dep optimization, before transform hooks execute
+									define: {
+										'process.platform': '"linux"',
+									}
+								}
 								}
 							}
 						});
@@ -74,7 +81,7 @@ export default defineIntegration({
 					}
 
 					if (!settings.sitemapConfig.contentRoot) {
-						settings.sitemapConfig.contentRoot = trimSlashes(config.srcDir.pathname);
+						settings.sitemapConfig.contentRoot = config.srcDir.pathname.replace(/\/+$/, "");
 						if (settings.starlight) {
 							settings.sitemapConfig.contentRoot += "/content/docs";
 						} else {
