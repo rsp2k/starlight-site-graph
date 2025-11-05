@@ -113,7 +113,9 @@ export function hasTouch() {
 }
 
 type DiffValue = { oldValue: unknown; newValue: unknown };
-type DiffResult = Record<string, DiffValue | DiffResult>;
+interface DiffResult {
+	[key: string]: DiffValue | DiffResult;
+}
 
 export function deepDiff(obj1: unknown, obj2: unknown): DiffResult {
 	const changes: DiffResult = {};
