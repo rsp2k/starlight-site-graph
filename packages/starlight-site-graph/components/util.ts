@@ -151,11 +151,17 @@ function isObject(item: any): boolean {
 
 /**
  * Adapted from https://stackoverflow.com/a/37164538/23278914
+ * Security: Added prototype pollution protection
  */
 export function deepMerge(target: any, source: any): any {
 	let output = Object.assign({}, target);
 	if (isObject(target) && isObject(source)) {
 		for (const [key, value] of Object.entries(source)) {
+			// Security: Block dangerous keys to prevent prototype pollution
+			if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+				continue;
+			}
+
 			if (isObject(value)) {
 				if (!(key in target))
 					Object.assign(output, { [key]: value });
