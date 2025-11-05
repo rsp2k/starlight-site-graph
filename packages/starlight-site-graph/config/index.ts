@@ -1,27 +1,31 @@
 import { AstroError } from 'astro/errors';
 import { type StarlightSiteGraphConfig, starlightSiteGraphConfig, starlightSiteGraphConfigSchema } from './base';
 
-function isObject(item: any): boolean {
-	return (item && typeof item === 'object' && !Array.isArray(item));
+function isObject(item: unknown): item is Record<string, unknown> {
+	return (item !== null && typeof item === 'object' && !Array.isArray(item));
 }
 
 /**
  * Adapted from https://stackoverflow.com/a/37164538/23278914
  */
-function deepMerge(target: any, source: any): any {
-	let output = Object.assign({}, target);
-	if (isObject(target) && isObject(source)) {
-		for (const [key, value] of Object.entries(source)) {
-			if (isObject(value)) {
-				if (!(key in target))
-					Object.assign(output, { [key]: value });
-				else
-					output[key] = deepMerge(target[key], value);
-			} else {
+function deepMerge(target: unknown, source: unknown): unknown {
+	if (!isObject(target) || !isObject(source)) {
+		return source;
+	}
+
+	const output = Object.assign({}, target);
+
+	for (const [key, value] of Object.entries(source)) {
+		if (isObject(value)) {
+			if (!(key in target))
 				Object.assign(output, { [key]: value });
-			}
+			else
+				output[key] = deepMerge(target[key], value);
+		} else {
+			Object.assign(output, { [key]: value });
 		}
 	}
+
 	return output;
 }
 
