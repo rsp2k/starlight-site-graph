@@ -1,3 +1,5 @@
+import { parseSVGSafely } from '../security';
+
 interface MenuItem {
 	group?: string;
 	text: string;
@@ -48,7 +50,15 @@ export function showContextMenu(e: MouseEvent, items: MenuItem[]) {
 			if (item.icon) {
 				const menuIcon = document.createElement('div');
 				menuIcon.className = 'slsg-menu-item-icon';
-				menuIcon.innerHTML = item.icon;
+				// Security: Use safe DOM APIs instead of innerHTML to prevent XSS
+				const parsedSVG = parseSVGSafely(item.icon);
+
+				if (parsedSVG) {
+					menuIcon.appendChild(parsedSVG);
+				} else {
+					// Fallback: treat as text if not valid SVG
+					menuIcon.textContent = item.icon;
+				}
 				menuItem.appendChild(menuIcon);
 			}
 
